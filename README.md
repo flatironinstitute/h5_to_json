@@ -22,5 +22,105 @@ Convert HDF5 files to JSON format with the option of selectively separating out 
 
 * Binary content that is separated out is intended to be stored in a content-addressable storage database, either on the local machine or in a remote database such as a [kachery](https://github.com/flatironinstitute/kachery).
 
+## Installation
 
+```
+pip install --upgrade h5_to_json
+```
 
+Or a development installation (after cloning this repo and stepping into the directory):
+
+```
+pip install -e .
+```
+
+## Command line
+
+Converting .hdf5 to .json:
+
+```
+> h5_to_json --help
+
+usage: h5_to_json [-h] [--include-datasets]
+                  [--include-dataset-names INCLUDE_DATASET_NAMES]
+                  [--data-dir DATA_DIR]
+                  h5_path [json_out_path [json_out_path ...]]
+
+Serialize hdf5 file to JSON with option to separate out binary datasets
+
+positional arguments:
+  h5_path               Path to the hdf5 file
+  json_out_path         Optional path to the output JSON file or use -- if not
+                        provided, writes to stdout
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --include-datasets    Whether to include the binary data of datasets inside
+                        the JSON content (not a great idea for large datasets
+                        b/c the JSON serialization is inefficient)
+  --include-dataset-names INCLUDE_DATASET_NAMES
+                        Comma-separated list of names of datasets to include
+                        in the JSON content
+  --data-dir DATA_DIR, -d DATA_DIR
+                        Directory for storing binary data by hash
+
+```
+
+Converting .json back to .hdf5:
+
+```
+> json_to_h5 --help
+
+usage: json_to_h5 [-h] [--data-dir DATA_DIR] json_path h5_out_path
+
+Restore hdf5 file from a JSON input
+
+positional arguments:
+  json_path             Path to the JSON file
+  h5_out_path           Path to the hdf5 file
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --data-dir DATA_DIR, -d DATA_DIR
+                        Directory where binary data is stored by hash
+```
+
+For example:
+
+```
+# Convert hdf5 to json
+h5_to_json file1.h5 file1.h5.json --data-dir tmp_data
+
+# Retrieve the hdf5 file, but the file bytes won't exactly match
+json_to_h5 file1.h5.json file1_new.h5 --data-dir tmp_data
+
+# Back to json a second time
+h5_to_json file1_new.h5 file1_new.h5.json --data-dir tmp_data
+
+# Now verify that the two .json files have the same content using meld (or diff)
+meld file1.h5.json file1_new.h5.json
+```
+
+## Python API
+
+There is also a Python API. For example:
+
+```
+import h5_to_json as h5j
+
+# Represent hdf5 content in a dict
+X = h5j.h5_to_dict('file1.h5', data_dir='tmp_data')
+
+# Retrieve the hdf5 file (similar to the above command-line)
+h5j.dict_to_h5(X, 'file1_new.h5', data_dir='tmp_data')
+```
+
+## License
+
+See [COPYING](./COPYING)
+
+## Authors
+
+This project was derived from the source code of [hdf5-json](https://github.com/HDFGroup/hdf5-json) from the HDFGroup and was adapted by:
+
+Jeremy Magland, Center for Computational Mathematics, Flatiron Institute
