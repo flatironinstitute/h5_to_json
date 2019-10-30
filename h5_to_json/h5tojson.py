@@ -166,7 +166,8 @@ class DumpJson:
                 alias_name = alias[0].split('/')[-1]
         include_value = False
         write_binary = False
-        if (self.options['include_datasets']) or (alias_name in self.options['include_dataset_names']) or (shape_class == 'H5S_SCALAR'):
+        include_dataset_names = self.options.get('include_dataset_names', None) or []
+        if (self.options.get('include_datasets', False)) or (alias_name in include_dataset_names) or (shape_class == 'H5S_SCALAR'):
             include_value = True
         else:
             dset = self.db.getDatasetObjByUuid(uuid)

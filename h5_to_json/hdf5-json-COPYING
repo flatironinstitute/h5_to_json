@@ -1,5 +1,8 @@
 The json_to_h5 project was derived from the source code of hdf5-json October, 2019
-and therefore it is required that the below notice be distributed with this code
+and therefore it is required that the below notice be distributed with this code.
+
+Other parts of this project are released under the Apache-2.0 license. It is
+requested that you acknowledge the authors for that portion.
 -----------------------------------------------------------------------------
 
 Copyright Notice and License Terms for 
