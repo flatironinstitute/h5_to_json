@@ -7,7 +7,8 @@ def dict_to_h5(
         obj,
         h5_path,
         *,
-        data_dir=None
+        data_dir=None,
+        use_kachery=False
     ):
         if "root" not in obj:
             raise Exception("no root key in input file")
@@ -20,7 +21,7 @@ def dict_to_h5(
         Hdf5db.createHDF5File(h5_path) 
 
         with Hdf5db(h5_path, root_uuid=root_uuid, update_timestamps=False) as db:
-            h5writer = Writeh5(db, obj, data_dir=data_dir)
+            h5writer = Writeh5(db, obj, data_dir=data_dir, use_kachery=use_kachery)
             h5writer.writeFile()
 
         # open with h5py and remove the _db_ group

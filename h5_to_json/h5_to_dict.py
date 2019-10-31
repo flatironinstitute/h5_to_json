@@ -7,7 +7,8 @@ def h5_to_dict(
         *,
         include_datasets=False,
         include_dataset_names=[],
-        data_dir=None
+        data_dir=None,
+        use_kachery=False
     ):
         """
         Generate a temporary filename to avoid problems with trying to create a dbfile
@@ -30,7 +31,8 @@ def h5_to_dict(
         options = dict(
             include_datasets=include_datasets,
             include_dataset_names=include_dataset_names,
-            data_dir=data_dir
+            data_dir=data_dir,
+            use_kachery=use_kachery
         )
         with Hdf5db(h5_path, dbFilePath=dbFilename, readonly=True) as db:
             dumper = DumpJson(db, options=options)

@@ -211,9 +211,18 @@ class DumpJson:
                 sha1 = _compute_file_hash(path=fname, algorithm='sha1')
                 fname2 = self.options['data_dir'] + '/sha1_' + sha1 + '.dat'
                 os.rename(fname, fname2)
+                if self.options['use_kachery']:
+                    try:
+                        import kachery as ka
+                    except:
+                        raise Exception('Kachery is not installed. Try "pip install --upgrade kachery".')
+                    ka.store_file(fname2)
                 response['valueHash'] = dict(
                     sha1=sha1
                 )
+            else:
+                if self.options['use_kachery']:
+                    raise Exception('Cannot use kachery without data_dir')
         return response
 
     def dumpDatasets(self):

@@ -2629,7 +2629,6 @@ class Hdf5db:
             #data = converted_data
         
         if format == "json":
-
             try:
                 i = 0
                 for point in points:

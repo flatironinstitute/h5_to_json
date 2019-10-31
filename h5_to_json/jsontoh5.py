@@ -15,6 +15,7 @@ if six.PY3:
     unicode = str
     
 import sys
+import os
 import json
 import argparse
 import h5py
@@ -32,12 +33,13 @@ Writeh5 - return json representation of all objects within the given file
 """
 
 class Writeh5:
-    def __init__(self, db, json, options=None, data_dir=None):
+    def __init__(self, db, json, options=None, data_dir=None, use_kachery=False):
         self.options = options
         self.db = db
         self.json = json
         self.root_uuid = None
         self.data_dir = data_dir
+        self.use_kachery = use_kachery
 
     #
     # Create a hard, soft, or external link
@@ -102,17 +104,34 @@ class Writeh5:
                 data = self.db.toRef(len(dims), datatype, data)
                 self.db.setDatasetValuesByUuid(uuid, data)
         elif "valueHash" in body:
-            if not self.data_dir:
-                raise Exception('Cannot retrieve data from valueHash because data_dir is not specified')
+            if not self.data_dir and not self.use_kachery:
+                raise Exception('Cannot retrieve data from valueHash because data_dir is not specified and use_kachery is False')
             fname = None
+            hashpath = None
             for alg in ['sha1', 'md5']:
                 if alg in body['valueHash']:
                     fname = self.data_dir + '/{}_{}.dat'.format(alg, body['valueHash'][alg])
+                    hashpath = '{}://{}'.format(alg, body['valueHash'][alg])
             if fname is None:
                 raise Exception('Unexpected valueHash')
-            print('Reading {} with shape {}'.format(body['alias'], body['shape'].get('dims')))
-            with open(fname, 'rb') as f:
-                self.db.setDatasetValuesByUuid(uuid, data=f, format='binary')
+            if self.data_dir:                
+                if os.path.exists(fname):
+                    print('Reading {} with shape {}'.format(body['alias'], body['shape'].get('dims')))
+                    with open(fname, 'rb') as f:
+                        self.db.setDatasetValuesByUuid(uuid, data=f, format='binary')
+                    return
+            if self.use_kachery:
+                try:
+                    import kachery as ka
+                except:
+                    raise Exception('Kachery is not installed. Try "pip install --upgrade kachery".')
+                fname = ka.load_file(hashpath)
+                if not fname:
+                    raise Exception('Unable to find file: {}'.format(hashpath))
+                with open(fname, 'rb') as f:
+                    self.db.setDatasetValuesByUuid(uuid, data=f, format='binary')
+                return
+            raise Exception('Unable to find file: {}'.format(hashpath))
 
 
     def createAttribute(self, attr_json, col_name, uuid):
