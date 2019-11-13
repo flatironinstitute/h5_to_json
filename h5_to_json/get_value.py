@@ -148,7 +148,7 @@ class LazyRemoteArray:
                     f.seek(offset)
                     buf = f.read(self.dtype.itemsize * (stop2 - start2))
                     x = np.frombuffer(buf, dtype=self.dtype)
-                    ret[i1, :] = x[::step2]
+                    ret[i1 - start1, :] = x[::step2]
                 return ret
         else:
             raise Exception('This slicing case not handled yet for LazyRemoteArray.')
