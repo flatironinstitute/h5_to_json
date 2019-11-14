@@ -89,7 +89,7 @@ class LazyRemoteArray:
         import kachery as ka
         if isinstance(index, int):
             offset = index * self.dtype.itemsize
-            with ka.open_file(self._path, block_size=100) as f:
+            with ka.open_file(self._path) as f:
                 f.seek(offset)
                 buf = f.read(self.dtype.itemsize)
                 x = np.frombuffer(buf, dtype=self.dtype)
@@ -105,7 +105,7 @@ class LazyRemoteArray:
                     stop = self.shape[0]
                 if step is None:
                     step = 1
-                with ka.open_file(self._path, block_size=4096) as f:
+                with ka.open_file(self._path) as f:
                     offset = start * self.dtype.itemsize
                     f.seek(offset)
                     buf = f.read(self.dtype.itemsize * (stop - start))
@@ -141,7 +141,7 @@ class LazyRemoteArray:
             b1 = len(range(start1, stop1, step1))
             b2 = len(range(start2, stop2, step2))
             shape0 = (b1, b2)
-            with ka.open_file(self._path, block_size=4096) as f:
+            with ka.open_file(self._path) as f:
                 ret = np.empty(shape=shape0, dtype=self.dtype)
                 for i1 in range(start1, stop1, step1):
                     offset = (i1 * self.shape[1] + start2) * self.dtype.itemsize
