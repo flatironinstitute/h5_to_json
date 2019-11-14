@@ -4,7 +4,7 @@ pkg_name = "h5_to_json"
 
 setuptools.setup(
     name=pkg_name,
-    version="0.1.4",
+    version="0.1.5",
     author="Jeremy Magland",
     description="Represent .hdf5 files in .json format - derived from https://github.com/HDFGroup/hdf5-json",
     packages=setuptools.find_packages(),

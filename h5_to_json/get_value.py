@@ -142,14 +142,25 @@ class LazyRemoteArray:
             b2 = len(range(start2, stop2, step2))
             shape0 = (b1, b2)
             with ka.open_file(self._path) as f:
-                ret = np.empty(shape=shape0, dtype=self.dtype)
-                for i1 in range(start1, stop1, step1):
-                    offset = (i1 * self.shape[1] + start2) * self.dtype.itemsize
-                    f.seek(offset)
-                    buf = f.read(self.dtype.itemsize * (stop2 - start2))
-                    x = np.frombuffer(buf, dtype=self.dtype)
-                    ret[i1 - start1, :] = x[::step2]
-                return ret
+                if step1 == 1:
+                    f.seek(start1 * self.shape[1])
+                    buf = f.read(self.dtype.itemsize * (stop1 - start1) * self.shape[1])
+                    x = np.frombuffer(buf, dtype=self.dtype).reshape((stop1 - start1, self.shape[1]))
+                    return x[:, start2:stop2:step2]
+                elif step1 <= 10:
+                    f.seek(start1 * self.shape[1])
+                    buf = f.read(self.dtype.itemsize * (stop1 - start1) * self.shape[1])
+                    x = np.frombuffer(buf, dtype=self.dtype).reshape((stop1 - start1, self.shape[1]))
+                    return x[::step1, :][:, start2:stop2:step2]
+                else:
+                    ret = np.empty(shape=shape0, dtype=self.dtype)
+                    for i1 in range(start1, stop1, step1):
+                        offset = (i1 * self.shape[1] + start2) * self.dtype.itemsize
+                        f.seek(offset)
+                        buf = f.read(self.dtype.itemsize * (stop2 - start2))
+                        x = np.frombuffer(buf, dtype=self.dtype)
+                        ret[i1 - start1, :] = x[::step2]
+                    return ret
         else:
             raise Exception('This slicing case not handled yet for LazyRemoteArray.')
         return None
