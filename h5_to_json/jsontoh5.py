@@ -49,7 +49,10 @@ class Writeh5:
         link_class = link_obj["class"]
         if link_class == 'H5L_TYPE_HARD':
             child_uuid = link_obj["id"]
-            self.db.linkObject(parent_uuid, child_uuid, title)
+            try:
+                self.db.linkObject(parent_uuid, child_uuid, title)
+            except:
+                print(f'WARNING: unable to hard link object: {title}')
         elif link_class == 'H5L_TYPE_SOFT':
             h5path = link_obj["h5path"]
             self.db.createSoftLink(parent_uuid, h5path, title)

@@ -89,11 +89,16 @@ class DumpJson:
 
 
     def dumpGroup(self, uuid):
+        exclude_groups = self.options.get('exclude_groups', None) or []
         item = self.db.getGroupItemByUuid(uuid)
         if 'alias' in item:
             alias = item['alias']
             if alias:
                 self.log.info("dumpGroup alias: [" + alias[0] + "]")
+                for a in alias:
+                    for e in exclude_groups:
+                        if e == a or a.startswith(e + '/'):
+                            return None
         for key in ('ctime', 'mtime', 'linkCount', 'attributeCount', 'id'):
             if key in item:
                 del item[key]
@@ -113,12 +118,14 @@ class DumpJson:
         uuids = self.db.getCollection("groups")
         for uuid in uuids:
             item = self.dumpGroup(uuid)
-            groups[uuid] = item
+            if item is not None:
+                groups[uuid] = item
 
         self.json['groups'] = groups
 
 
     def dumpDataset(self, uuid):
+        exclude_groups = self.options.get('exclude_groups', None) or []
         response = { }
         self.log.info("dumpDataset: " + uuid)
         item = self.db.getDatasetItemByUuid(uuid)
@@ -126,6 +133,10 @@ class DumpJson:
             alias = item['alias']
             if alias:
                 self.log.info("dumpDataset alias: [" + alias[0] + "]")
+                for a in alias:
+                    for e in exclude_groups:
+                        if e == a or a.startswith(e + '/'):
+                            return None
             response['alias'] = item['alias']
         else:
             alias = None
@@ -231,7 +242,8 @@ class DumpJson:
             datasets = {}
             for uuid in uuids:
                 item = self.dumpDataset(uuid)
-                datasets[uuid] = item
+                if item is not None:
+                    datasets[uuid] = item
 
             self.json['datasets'] = datasets
 

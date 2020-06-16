@@ -7,6 +7,7 @@ def h5_to_dict(
         *,
         include_datasets=False,
         include_dataset_names=[],
+        exclude_groups=[],
         data_dir=None,
         use_kachery=False
     ):
@@ -31,6 +32,7 @@ def h5_to_dict(
         options = dict(
             include_datasets=include_datasets,
             include_dataset_names=include_dataset_names,
+            exclude_groups=exclude_groups,
             data_dir=data_dir,
             use_kachery=use_kachery
         )
